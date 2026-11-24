@@ -1,0 +1,157 @@
+- [ ] T-001 Project foundation
+  - Satisfies: TECH_STACK.md
+  - External boundary: no
+  - Acceptance criteria:
+    - The selected Laravel and package versions install together from composer.lock.
+    - Plan configuration, queue, scheduler, atomic-lock cache, mail, and frontend build are configured.
+    - A probe against the installed payment package records whether public operations exist to change future renewal amount and cadence and to end a recurring schedule immediately without refund.
+    - The configured mail transport is verified with a test delivery.
+    - Every verified constraint in TECH_STACK.md is satisfied.
+    - Every selected verification command in TECH_STACK.md passes.
+
+- [ ] T-002 Portal access and billable-entity authorization
+  - Satisfies: PRODUCT_SPEC.md Access and billable entity (FR-001, FR-002, FR-003); Acceptance Criteria (AC-001)
+  - External boundary: no
+  - Acceptance criteria:
+    - An unauthenticated request returns to sign-in without rendering billing data.
+    - An authenticated subscriber can access only the configured billable entity they are authorized to manage.
+    - Cross-entity requests cannot read or change subscriptions, payment methods, or billing documents.
+    - Unit tests pass.
+
+- [ ] T-003 Plan catalog, pricing, and eligibility
+  - Satisfies: PRODUCT_SPEC.md Plans (FR-004, FR-005, FR-006); Acceptance Criteria (AC-002, AC-003)
+  - External boundary: no
+  - Acceptance criteria:
+    - Monthly and yearly plan prices, descriptions, trials, features, incentives, and archived status are validated and displayed.
+    - Archived plans remain visible to current subscribers and cannot be newly selected.
+    - Invalid and ineligible plans cannot start a charge.
+    - Unit tests pass.
+
+- [ ] T-004 Trial, billing-key enrollment, and subscription start
+  - Satisfies: PRODUCT_SPEC.md Plans (FR-008, FR-010, FR-041, FR-042); Payment methods and subscriptions (FR-011, FR-014); Acceptance Criteria (AC-004, AC-005, AC-010, AC-017)
+  - External boundary: yes
+  - Acceptance criteria:
+    - A live PortOne billing-key enrollment and confirmation is observed and recorded before implementation.
+    - A billing key is stored only after PortOne confirms issuance; display details are masked.
+    - The configured five-day default or per-plan trial and terms acceptance are applied before the first charge.
+    - Subscription start uses the selected configured plan and creates state only when the start condition succeeds.
+    - A live E2E test exercises the PortOne boundary and passes.
+    - Unit tests pass.
+
+- [ ] T-005 Billing-key replacement and removal protection
+  - Satisfies: PRODUCT_SPEC.md Payment methods and subscriptions (FR-012, FR-013); Acceptance Criteria (AC-009)
+  - External boundary: yes
+  - Acceptance criteria:
+    - Live PortOne billing-key replacement and deletion behavior is observed and recorded.
+    - Replacement uses the newly confirmed key for future renewals.
+    - A key used by a non-ended subscription cannot be deleted.
+    - A live E2E test exercises the PortOne boundary and passes.
+    - Unit tests pass.
+
+- [ ] T-006 Plan switching and seat pricing
+  - Satisfies: PRODUCT_SPEC.md Plans (FR-007, FR-009, FR-034, FR-035); Payment methods and subscriptions (FR-015); Acceptance Criteria (AC-006, AC-007, AC-008)
+  - External boundary: yes
+  - Acceptance criteria:
+    - The operation availability recorded by the T-001 probe is confirmed before adjustment work begins.
+    - Sparko calculates plan and seat proration; the payment integration applies the change through the recorded public operation when one is available.
+    - Eligible plan switches apply immediately, preserve the billing anchor and trial, prorate the remaining period, and commit only after a required adjustment charge succeeds.
+    - Seat changes apply immediately with the same proration behavior and enforce a minimum quantity of one.
+    - Live PortOne E2E coverage exercises any charge or refund behavior introduced.
+    - Unit tests pass.
+
+- [ ] T-007 Renewal charging and one-charge-per-period enforcement
+  - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-016, FR-018); Acceptance Criteria (AC-011)
+  - External boundary: yes
+  - Acceptance criteria:
+    - A live PortOne billing-key renewal charge is observed and recorded.
+    - A due subscription creates one charge for the approved period amount.
+    - Reprocessing a due period cannot create a second charge.
+    - A PortOne outage does not mark an unpaid period as paid.
+    - A live E2E test exercises the PortOne boundary and passes.
+    - Unit tests pass.
+
+- [ ] T-008 Failed-renewal retries and notices
+  - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-017, FR-023); Acceptance Criteria (AC-012, AC-023)
+  - External boundary: yes
+  - Acceptance criteria:
+    - A live declined billing-key charge is observed and recorded.
+    - Retries follow the configured schedule, and the final failure reaches the approved terminal state.
+    - Failed charges are visible and enabled notices are sent to the billing email.
+    - A live E2E test exercises the PortOne boundary and passes.
+    - Unit tests pass.
+
+- [ ] T-009 PortOne webhook intake and idempotency
+  - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-019); Acceptance Criteria (AC-013)
+  - External boundary: yes
+  - Acceptance criteria:
+    - A live PortOne subscription charge event is observed and recorded.
+    - The package verifies webhook signatures before dispatch.
+    - Repeated delivery cannot repeat payment or subscription state changes.
+    - A live E2E test exercises the webhook boundary and passes.
+    - Unit tests pass.
+
+- [ ] T-010 Payment history, invoices, receipts, and email
+  - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-020, FR-021, FR-022, FR-039, FR-040); Acceptance Criteria (AC-014, AC-015)
+  - External boundary: yes
+  - Acceptance criteria:
+    - The mail transport verified in T-001 is used for invoice delivery.
+    - A live successful charge and its PortOne receipt URL are observed and recorded.
+    - History displays date, amount, plan, period, seat quantity when applicable, and outcome.
+    - The approved document is downloadable by the owning billable entity only.
+    - Enabled invoice delivery sends the PDF invoice to the configured destination.
+    - A live E2E test covers PortOne document retrieval; email delivery is verified against the selected mail boundary.
+    - Unit tests pass.
+
+- [ ] T-011 Cancellation and resume
+  - Satisfies: PRODUCT_SPEC.md Cancellation and renewal (FR-024, FR-025, FR-026); Acceptance Criteria (AC-016)
+  - External boundary: no
+  - Acceptance criteria:
+    - Cancellation ends renewals at the period boundary and does not automatically refund a paid period.
+    - A scheduled cancellation can be resumed before period end.
+    - Unit tests pass.
+
+- [ ] T-012 Plan entitlements and subscription access gate
+  - Satisfies: PRODUCT_SPEC.md Plans (FR-028); Access and billable entity (FR-029); Acceptance Criteria (AC-018)
+  - External boundary: no
+  - Acceptance criteria:
+    - Integrators can read the active plan's machine-readable options.
+    - Active subscriptions pass the access gate; ordinary requests without an active subscription redirect to the billing portal and asynchronous requests return HTTP 402.
+    - Cross-entity entitlement checks cannot read another billable entity's subscription.
+    - Unit tests pass.
+
+- [ ] T-013 Included and unavailable plan features
+  - Satisfies: PRODUCT_SPEC.md Plans (FR-030); Acceptance Criteria (AC-019)
+  - External boundary: no
+  - Acceptance criteria:
+    - Plan definitions distinguish included features from unavailable features.
+    - The portal displays both kinds of feature distinctly.
+    - Unit tests pass.
+
+- [ ] T-014 Promotion codes and subscription discounts
+  - Satisfies: PRODUCT_SPEC.md Portal integration and discounts (FR-031, FR-036, FR-037, FR-038); Acceptance Criteria (AC-020)
+  - External boundary: yes
+  - Acceptance criteria:
+    - Fixed KRW and percentage discounts support one-charge, finite-charge, and indefinite durations.
+    - A code can be applied at subscription start or to an existing subscription; only one active discount is allowed.
+    - Invalid, expired, and ineligible codes do not change subscription state.
+    - Discounted charge amounts are verified with a live PortOne E2E test.
+    - Unit tests pass.
+
+- [ ] T-015 Isolated portal UI and Korean presentation
+  - Satisfies: PRODUCT_SPEC.md Portal integration and discounts (FR-027, FR-033); Acceptance Criteria (AC-021)
+  - External boundary: no
+  - Acceptance criteria:
+    - The portal's bundled UI works when the host application uses a different frontend stack.
+    - The portal returns to the configured host-application destination.
+    - Korean-language labels, KRW formatting, and Korean date formatting are present.
+    - Unit tests pass.
+
+- [ ] T-016 End subscription before billable-entity deletion
+  - Satisfies: PRODUCT_SPEC.md PortOne adaptation policies (FR-043); Portal integration and discounts (FR-032); Acceptance Criteria (AC-022)
+  - External boundary: yes
+  - Acceptance criteria:
+    - The immediate schedule-termination operation availability recorded by the T-001 probe is confirmed before deletion work begins.
+    - Deleting a billable entity ends its recurring subscription before the entity is removed and does not refund settled charges.
+    - A failed cancellation prevents deletion and leaves an actionable failure state.
+    - A live PortOne E2E test confirms no future renewal is charged.
+    - Unit tests pass.
