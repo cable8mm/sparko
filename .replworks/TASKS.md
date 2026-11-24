@@ -18,7 +18,7 @@
     - Cross-entity requests cannot read or change subscriptions, payment methods, or billing documents.
     - Unit tests pass.
 
-- [ ] T-003 Plan catalog, pricing, and eligibility
+- [x] T-003 Plan catalog, pricing, and eligibility
   - Satisfies: PRODUCT_SPEC.md Plans (FR-004, FR-005, FR-006); Acceptance Criteria (AC-002, AC-003)
   - External boundary: no
   - Acceptance criteria:
