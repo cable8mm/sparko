@@ -1,4 +1,4 @@
-- [ ] T-001 Project foundation
+- [x] T-001 Project foundation
   - Satisfies: TECH_STACK.md
   - External boundary: no
   - Acceptance criteria:
