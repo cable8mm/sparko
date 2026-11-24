@@ -4,8 +4,8 @@
 - laravel/framework ^12.0 || ^13.0
 - cable8mm/laravel-portone ^0.8.0
 - cable8mm/portone-php ^0.8.0, installed through laravel-portone
+- inertiajs/inertia-laravel ^2.0, required by the approved Inertia.js with React option
 - dompdf/dompdf (version verify)
-- cable8mm/laravel-social-auth (version and provider coverage verify)
 - React ^18.0 (verify)
 - @inertiajs/react (version verify)
 - Vite (version verify)
@@ -15,7 +15,7 @@
 - MySQL 8.0 (verify)
 - SQLite in-memory for tests
 - Laravel queue, scheduler, and a cache driver that supports atomic locks
-- [UNVERIFIED] Confirm the supported versions and compatibility of laravel-social-auth, React, Inertia React, Vite, PHPUnit, PHPStan, Larastan, MySQL, and dompdf/dompdf before creating the project foundation.
+- [UNVERIFIED] Confirm the supported versions and compatibility of React, Inertia React, Vite, PHPUnit, PHPStan, Larastan, MySQL, and dompdf/dompdf before creating the project foundation.
 
 ## 2. Framework- or tool-mandated paths and file names only
 
@@ -106,6 +106,8 @@
 - PostgreSQL
 - Private Composer repository
 - Laravel Socialite
+- cable8mm/laravel-social-auth
+- Sign-in and identity-provider integration owned by the host application
 - Direct PortOne V2 HTTP API calls outside cable8mm/laravel-portone
 - Additional payment-provider abstraction layers
 - Stripe SDK
