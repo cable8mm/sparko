@@ -9,7 +9,7 @@
     - Every verified constraint in TECH_STACK.md is satisfied.
     - Every selected verification command in TECH_STACK.md passes.
 
-- [ ] T-002 Portal access and billable-entity authorization
+- [x] T-002 Portal access and billable-entity authorization
   - Satisfies: PRODUCT_SPEC.md Access and billable entity (FR-001, FR-002, FR-003); Acceptance Criteria (AC-001)
   - External boundary: no
   - Acceptance criteria:
