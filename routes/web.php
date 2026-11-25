@@ -18,4 +18,6 @@ Route::middleware(['auth', EnsureBillableAccess::class])
         Route::post('/{billable}/subscription', [PortalController::class, 'startSubscription'])->name('sparko.subscription.store');
         Route::post('/{billable}/subscription/plan', [PortalController::class, 'switchPlan'])->name('sparko.subscription.plan');
         Route::get('/{billable}/payments/{payment}/invoice', [PortalController::class, 'downloadInvoice'])->name('sparko.invoice.download');
+        Route::post('/{billable}/subscription/cancel', [PortalController::class, 'cancelSubscription'])->name('sparko.subscription.cancel');
+        Route::post('/{billable}/subscription/resume', [PortalController::class, 'resumeSubscription'])->name('sparko.subscription.resume');
     });

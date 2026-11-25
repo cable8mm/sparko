@@ -11,11 +11,13 @@ use App\Sparko\PaymentMethods\BillingKeyInUse;
 use App\Sparko\PaymentMethods\PaymentMethodManager;
 use App\Sparko\Plans\PlanCatalog;
 use App\Sparko\Subscriptions\PlanSwitchService;
+use App\Sparko\Subscriptions\SubscriptionCancellation;
 use App\Sparko\Subscriptions\SubscriptionStarter;
 use Cable8mm\LaravelPortone\BillingKeyGateway;
 use Cable8mm\LaravelPortone\BillingKeyRegistry;
 use Cable8mm\LaravelPortone\Models\Payment;
 use Carbon\CarbonImmutable;
+use DomainException;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -138,6 +140,39 @@ class PortalController extends Controller
         }
 
         return response()->json(['status' => 'DELETED']);
+    }
+
+    public function cancelSubscription(mixed $billable, SubscriptionCancellation $cancellation): JsonResponse
+    {
+        $billable = $this->billable($billable);
+
+        try {
+            $subscription = $cancellation->cancel($billable);
+        } catch (DomainException $exception) {
+            throw ValidationException::withMessages(['subscription' => $exception->getMessage()]);
+        }
+
+        return response()->json([
+            'status' => $subscription->status,
+            'plan_id' => $subscription->plan_id,
+            'refund' => 0,
+        ]);
+    }
+
+    public function resumeSubscription(mixed $billable, SubscriptionCancellation $cancellation): JsonResponse
+    {
+        $billable = $this->billable($billable);
+
+        try {
+            $subscription = $cancellation->resume($billable);
+        } catch (DomainException $exception) {
+            throw ValidationException::withMessages(['subscription' => $exception->getMessage()]);
+        }
+
+        return response()->json([
+            'status' => $subscription->status,
+            'plan_id' => $subscription->plan_id,
+        ]);
     }
 
     public function switchPlan(Request $request, mixed $billable, PlanSwitchService $service): JsonResponse
