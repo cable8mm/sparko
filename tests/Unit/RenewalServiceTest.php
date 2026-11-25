@@ -10,6 +10,8 @@ use App\Sparko\Subscriptions\RenewalService;
 use Cable8mm\LaravelPortone\PaymentOperations;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Mailable;
+use Illuminate\Support\Facades\Mail;
 use Mockery;
 use Mockery\Adapter\Phpunit\MockeryPHPUnitIntegration;
 use RuntimeException;
@@ -68,7 +70,7 @@ class RenewalServiceTest extends TestCase
         $this->assertTrue(CarbonImmutable::parse((string) $subscription->getRawOriginal('next_charge_at'))->isAfter(CarbonImmutable::now()));
     }
 
-    public function test_an_outage_leaves_the_period_unpaid(): void
+    public function test_an_outage_schedules_a_retry_and_keeps_the_period_unpaid(): void
     {
         $user = User::factory()->create();
         $subscription = $this->subscription($user, 10000);
@@ -77,12 +79,46 @@ class RenewalServiceTest extends TestCase
         $payments->shouldReceive('chargeBillingKey')->once()->andThrow(new RuntimeException('provider unavailable'));
         $this->app->instance(PaymentOperations::class, $payments);
 
-        try {
-            app(RenewalService::class)->chargeDue(CarbonImmutable::now());
-            $this->fail('The provider failure should propagate.');
-        } catch (RuntimeException) {
-            $this->assertNull($subscription->fresh()->last_charged_period);
-        }
+        app(RenewalService::class)->chargeDue(CarbonImmutable::now());
+
+        $subscription->refresh();
+        $this->assertNull($subscription->last_charged_period);
+        $this->assertSame(1, $subscription->failed_attempts);
+        $this->assertTrue(CarbonImmutable::parse((string) $subscription->getRawOriginal('next_charge_at'))->isAfter(CarbonImmutable::now()));
+    }
+
+    public function test_the_final_failure_expires_the_subscription(): void
+    {
+        $user = User::factory()->create();
+        config()->set('portone.subscription_retry_after', '1,3,5');
+        $subscription = $this->subscription($user, 10000);
+        $subscription->update(['failed_attempts' => 3]);
+
+        $payments = Mockery::mock(PaymentOperations::class);
+        $payments->shouldReceive('chargeBillingKey')->once()->andThrow(new RuntimeException('declined'));
+        $this->app->instance(PaymentOperations::class, $payments);
+
+        app(RenewalService::class)->chargeDue(CarbonImmutable::now());
+
+        $subscription->refresh();
+        $this->assertSame('EXPIRED', $subscription->status);
+        $this->assertNull($subscription->next_charge_at);
+    }
+
+    public function test_an_enabled_notice_is_sent_to_the_billing_email(): void
+    {
+        config()->set('sparko.notify_failed_renewal', true);
+        Mail::fake();
+        $user = User::factory()->create(['email' => 'billing@example.com']);
+        $this->subscription($user, 10000);
+
+        $payments = Mockery::mock(PaymentOperations::class);
+        $payments->shouldReceive('chargeBillingKey')->once()->andThrow(new RuntimeException('declined'));
+        $this->app->instance(PaymentOperations::class, $payments);
+
+        app(RenewalService::class)->chargeDue(CarbonImmutable::now());
+
+        Mail::assertSent(fn (Mailable $mail): bool => $mail->hasTo('billing@example.com'));
     }
 
     public function test_a_credit_reduces_the_renewal_charge(): void
