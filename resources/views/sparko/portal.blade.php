@@ -1,4 +1,13 @@
 <div id="sparko-portal" data-billable-id="{{ $billable->getKey() }}">
+    @if ($subscription !== null)
+        <section data-sparko-subscription
+                 data-status="{{ $subscription->status }}"
+                 data-plan-id="{{ $subscription->plan_id }}"
+                 data-seat-quantity="{{ $subscription->seat_quantity }}"
+                 data-next-payment="{{ $subscription->next_charge_at?->toIso8601String() ?? '' }}">
+            <span data-renewal-amount>{{ $subscription->renewal_amount }}</span>
+        </section>
+    @endif
     <section data-sparko-plans>
         @foreach ($plans as $plan)
             <article data-plan-id="{{ $plan['id'] }}" @class(['archived' => $plan['archived'], 'current' => $plan['is_current']])>

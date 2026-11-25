@@ -48,7 +48,7 @@
     - A live E2E test exercises the PortOne boundary and passes.
     - Unit tests pass.
 
-- [ ] T-006 Plan switching and seat pricing
+- [x] T-006 Plan switching and seat pricing
   - Satisfies: PRODUCT_SPEC.md Plans (FR-007, FR-009, FR-034, FR-035); Payment methods and subscriptions (FR-015); Acceptance Criteria (AC-006, AC-007, AC-008)
   - External boundary: yes
   - Acceptance criteria:
