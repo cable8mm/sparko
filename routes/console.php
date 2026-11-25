@@ -11,3 +11,7 @@ Artisan::command('inspire', function () {
 Schedule::command('portone:charge-subscriptions')
     ->everyFiveMinutes()
     ->withoutOverlapping();
+
+Schedule::command('sparko:charge-renewals')
+    ->everyFiveMinutes()
+    ->withoutOverlapping();
