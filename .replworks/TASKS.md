@@ -80,7 +80,7 @@
     - A live E2E test exercises the PortOne boundary and passes.
     - Unit tests pass.
 
-- [ ] T-009 PortOne webhook intake and idempotency
+- [x] T-009 PortOne webhook intake and idempotency
   - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-019); Acceptance Criteria (AC-013)
   - External boundary: yes
   - Acceptance criteria:
