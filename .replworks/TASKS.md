@@ -59,7 +59,7 @@
     - Live PortOne E2E coverage exercises any charge or refund behavior introduced.
     - Unit tests pass.
 
-- [ ] T-007 Renewal charging and one-charge-per-period enforcement
+- [x] T-007 Renewal charging and one-charge-per-period enforcement
   - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-016, FR-018); Acceptance Criteria (AC-011)
   - External boundary: yes
   - Acceptance criteria:
