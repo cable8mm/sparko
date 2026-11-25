@@ -15,6 +15,10 @@ return new class extends Migration
             $table->string('billable_type');
             $table->string('billable_id');
             $table->string('plan_id');
+            $table->string('billing_interval');
+            $table->unsignedBigInteger('renewal_amount');
+            $table->unsignedInteger('seat_quantity')->default(1);
+            $table->bigInteger('credit_balance')->default(0);
             $table->string('billing_key_issue_id');
             $table->timestamp('trial_ends_at')->nullable();
             $table->timestamp('next_charge_at')->nullable();

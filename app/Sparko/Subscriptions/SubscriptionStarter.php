@@ -7,6 +7,7 @@ namespace App\Sparko\Subscriptions;
 use App\Models\SparkoSubscription;
 use App\Sparko\Contracts\BillableEntity;
 use App\Sparko\Plans\PlanCatalog;
+use App\Sparko\Plans\PlanPricing;
 use Cable8mm\LaravelPortone\Models\BillingKey;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,10 @@ use InvalidArgumentException;
 
 class SubscriptionStarter
 {
-    public function __construct(private readonly TrialManager $trials) {}
+    public function __construct(
+        private readonly TrialManager $trials,
+        private readonly PlanPricing $pricing,
+    ) {}
 
     public function start(
         BillableEntity $billable,
@@ -57,6 +61,10 @@ class SubscriptionStarter
             'billable_type' => $billable->getMorphClass(),
             'billable_id' => (string) $billable->getKey(),
             'plan_id' => $planId,
+            'billing_interval' => $this->pricing->interval($plan),
+            'renewal_amount' => $this->pricing->amount($plan),
+            'seat_quantity' => 1,
+            'credit_balance' => 0,
             'billing_key_issue_id' => $billingKeyIssueId,
             'trial_ends_at' => $trialEndsAt,
             'next_charge_at' => $trialEndsAt,

@@ -50,6 +50,10 @@ class PaymentMethodManagerTest extends TestCase
             'billable_type' => $user->getMorphClass(),
             'billable_id' => (string) $user->getKey(),
             'plan_id' => 'pro',
+            'billing_interval' => 'monthly',
+            'renewal_amount' => 10000,
+            'seat_quantity' => 1,
+            'credit_balance' => 0,
             'billing_key_issue_id' => $old->issue_id,
             'status' => 'TRIAL',
         ]);
@@ -70,6 +74,10 @@ class PaymentMethodManagerTest extends TestCase
             'billable_type' => $user->getMorphClass(),
             'billable_id' => (string) $user->getKey(),
             'plan_id' => 'pro',
+            'billing_interval' => 'monthly',
+            'renewal_amount' => 10000,
+            'seat_quantity' => 1,
+            'credit_balance' => 0,
             'billing_key_issue_id' => $key->issue_id,
             'status' => 'TRIAL',
         ]);

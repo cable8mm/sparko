@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Models\SparkoSubscription;
 use App\Sparko\Contracts\BillableEntity;
 use App\Sparko\PaymentMethods\BillingKeyInUse;
 use App\Sparko\PaymentMethods\PaymentMethodManager;
 use App\Sparko\Plans\PlanCatalog;
+use App\Sparko\Subscriptions\PlanSwitchService;
 use App\Sparko\Subscriptions\SubscriptionStarter;
 use Cable8mm\LaravelPortone\BillingKeyGateway;
 use Cable8mm\LaravelPortone\BillingKeyRegistry;
@@ -25,10 +27,19 @@ class PortalController extends Controller
     {
         $billable = $this->billable($billable);
 
+        $subscription = SparkoSubscription::query()
+            ->where('billable_type', $billable->getMorphClass())
+            ->where('billable_id', (string) $billable->getKey())
+            ->whereNotIn('status', ['ENDED', 'EXPIRED'])
+            ->first();
+
+        $currentPlanId = $subscription === null ? null : (string) $subscription->plan_id;
+
         return view('sparko.portal', [
             'billable' => $billable,
-            'plans' => $catalog->forPortal($billable, null),
-            'currentPlanId' => null,
+            'plans' => $catalog->forPortal($billable, $currentPlanId),
+            'currentPlanId' => $currentPlanId,
+            'subscription' => $subscription,
         ]);
     }
 
@@ -107,6 +118,30 @@ class PortalController extends Controller
         }
 
         return response()->json(['status' => 'DELETED']);
+    }
+
+    public function switchPlan(Request $request, mixed $billable, PlanSwitchService $service): JsonResponse
+    {
+        $billable = $this->billable($billable);
+
+        $data = $request->validate([
+            'plan_id' => ['required', 'string'],
+            'seat_quantity' => ['sometimes', 'integer', 'min:1'],
+        ]);
+
+        $subscription = $service->switch(
+            $billable,
+            $data['plan_id'],
+            isset($data['seat_quantity']) ? (int) $data['seat_quantity'] : null,
+        );
+
+        return response()->json([
+            'plan_id' => $subscription->plan_id,
+            'status' => $subscription->status,
+            'seat_quantity' => $subscription->seat_quantity,
+            'renewal_amount' => $subscription->renewal_amount,
+            'credit_balance' => $subscription->credit_balance,
+        ]);
     }
 
     public function startSubscription(
