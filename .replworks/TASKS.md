@@ -70,7 +70,7 @@
     - A live E2E test exercises the PortOne boundary and passes.
     - Unit tests pass.
 
-- [ ] T-008 Failed-renewal retries and notices
+- [x] T-008 Failed-renewal retries and notices
   - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-017, FR-023); Acceptance Criteria (AC-012, AC-023)
   - External boundary: yes
   - Acceptance criteria:

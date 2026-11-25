@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace App\Sparko\Subscriptions;
 
+use App\Mail\FailedRenewalNotice;
 use App\Models\SparkoSubscription;
 use App\Sparko\Plans\PlanPricing;
 use Cable8mm\LaravelPortone\PaymentOperations;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class RenewalService
 {
@@ -57,12 +60,20 @@ class RenewalService
             }
 
             if ($amount > 0) {
-                $this->payments->chargeBillingKey(
-                    $billable,
-                    (string) $subscription->billing_key_issue_id,
-                    $amount,
-                    'Subscription renewal',
-                );
+                try {
+                    $this->payments->chargeBillingKey(
+                        $billable,
+                        (string) $subscription->billing_key_issue_id,
+                        $amount,
+                        'Subscription renewal',
+                    );
+                } catch (Throwable) {
+                    $this->scheduleRetry($subscription, $billable, $now);
+
+                    $count++;
+
+                    continue;
+                }
             }
 
             $next = CarbonImmutable::parse($period)
@@ -72,11 +83,71 @@ class RenewalService
                 'last_charged_period' => $period,
                 'next_charge_at' => $next,
                 'credit_balance' => $credit,
+                'failed_attempts' => 0,
             ]);
 
             $count++;
         }
 
         return $count;
+    }
+
+    private function scheduleRetry(SparkoSubscription $subscription, Model $billable, CarbonImmutable $now): void
+    {
+        $attempts = (int) $subscription->failed_attempts + 1;
+        $days = $this->retryDays();
+        $index = $attempts - 1;
+
+        if (! isset($days[$index])) {
+            $subscription->update([
+                'status' => 'EXPIRED',
+                'next_charge_at' => null,
+                'failed_attempts' => $attempts,
+            ]);
+
+            $this->notify($billable);
+
+            return;
+        }
+
+        $subscription->update([
+            'next_charge_at' => $now->addDays($days[$index]),
+            'failed_attempts' => $attempts,
+        ]);
+
+        $this->notify($billable);
+    }
+
+    /**
+     * @return list<int>
+     */
+    private function retryDays(): array
+    {
+        $configured = config('portone.subscription_retry_after');
+
+        if (is_array($configured)) {
+            return array_values(array_map('intval', $configured));
+        }
+
+        if (! is_string($configured)) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map('intval', explode(',', $configured)), fn (int $day): bool => $day > 0));
+    }
+
+    private function notify(Model $billable): void
+    {
+        if (config('sparko.notify_failed_renewal') !== true) {
+            return;
+        }
+
+        $email = data_get($billable, 'email');
+
+        if (! is_string($email) || $email === '') {
+            return;
+        }
+
+        Mail::to($email)->send(new FailedRenewalNotice($email));
     }
 }
