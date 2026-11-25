@@ -14,6 +14,8 @@ return [
     'billable_model' => env('SPARKO_BILLABLE_MODEL', User::class),
     'require_terms' => env('SPARKO_REQUIRE_TERMS', false),
     'notify_failed_renewal' => env('SPARKO_NOTIFY_FAILED_RENEWAL', false),
+    'email_invoices' => env('SPARKO_EMAIL_INVOICES', false),
+    'invoice_email' => env('SPARKO_INVOICE_EMAIL'),
     'live_billing_key_e2e' => env('SPARKO_LIVE_BILLING_KEY_E2E', false),
     'e2e_channel_key' => env('PORTONE_E2E_CHANNEL_KEY'),
 ];

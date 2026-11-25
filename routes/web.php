@@ -17,4 +17,5 @@ Route::middleware(['auth', EnsureBillableAccess::class])
         Route::delete('/{billable}/payment-method', [PortalController::class, 'removePaymentMethod'])->name('sparko.payment-method.destroy');
         Route::post('/{billable}/subscription', [PortalController::class, 'startSubscription'])->name('sparko.subscription.store');
         Route::post('/{billable}/subscription/plan', [PortalController::class, 'switchPlan'])->name('sparko.subscription.plan');
+        Route::get('/{billable}/payments/{payment}/invoice', [PortalController::class, 'downloadInvoice'])->name('sparko.invoice.download');
     });
