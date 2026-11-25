@@ -9,6 +9,9 @@ use Cable8mm\LaravelPortone\GatewayBillingKey;
 
 class FakeBillingKeyGateway implements BillingKeyGateway
 {
+    /** @var list<string> */
+    public array $deleted = [];
+
     public function assertConfigured(): void {}
 
     public function billingKeyInfo(#[\SensitiveParameter] string $billingKey): GatewayBillingKey
@@ -16,7 +19,10 @@ class FakeBillingKeyGateway implements BillingKeyGateway
         return new GatewayBillingKey('ISSUED', 'customer-1', null);
     }
 
-    public function deleteBillingKey(#[\SensitiveParameter] string $billingKey, string $reason): void {}
+    public function deleteBillingKey(#[\SensitiveParameter] string $billingKey, string $reason): void
+    {
+        $this->deleted[] = $billingKey;
+    }
 
     public function payWithBillingKey(string $paymentId, #[\SensitiveParameter] string $billingKey, string $orderName, int $amount): void {}
 }

@@ -38,7 +38,7 @@
     - A live E2E test exercises the PortOne boundary and passes.
     - Unit tests pass.
 
-- [ ] T-005 Billing-key replacement and removal protection
+- [x] T-005 Billing-key replacement and removal protection
   - Satisfies: PRODUCT_SPEC.md Payment methods and subscriptions (FR-012, FR-013); Acceptance Criteria (AC-009)
   - External boundary: yes
   - Acceptance criteria:

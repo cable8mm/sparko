@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Sparko\Contracts\BillableEntity;
+use App\Sparko\PaymentMethods\BillingKeyInUse;
+use App\Sparko\PaymentMethods\PaymentMethodManager;
 use App\Sparko\Plans\PlanCatalog;
 use App\Sparko\Subscriptions\SubscriptionStarter;
 use Cable8mm\LaravelPortone\BillingKeyGateway;
@@ -63,6 +65,48 @@ class PortalController extends Controller
             'issue_name' => $record->issue_name,
             'status' => 'ISSUED',
         ], 201);
+    }
+
+    public function replacePaymentMethod(Request $request, mixed $billable, PaymentMethodManager $manager): JsonResponse
+    {
+        $billable = $this->billable($billable);
+
+        $data = $request->validate([
+            'billing_key' => ['required', 'string'],
+            'customer_id' => ['required', 'string'],
+            'issue_name' => ['required', 'string'],
+        ]);
+
+        $record = $manager->replace(
+            $billable,
+            $data['billing_key'],
+            $data['customer_id'],
+            $data['issue_name'],
+        );
+
+        return response()->json([
+            'issue_id' => $record->issue_id,
+            'customer_id' => $record->customer_id,
+            'issue_name' => $record->issue_name,
+            'status' => 'ISSUED',
+        ]);
+    }
+
+    public function removePaymentMethod(Request $request, mixed $billable, PaymentMethodManager $manager): JsonResponse
+    {
+        $billable = $this->billable($billable);
+
+        $data = $request->validate([
+            'issue_id' => ['required', 'string'],
+        ]);
+
+        try {
+            $manager->remove($billable, $data['issue_id']);
+        } catch (BillingKeyInUse $exception) {
+            throw ValidationException::withMessages(['issue_id' => $exception->getMessage()]);
+        }
+
+        return response()->json(['status' => 'DELETED']);
     }
 
     public function startSubscription(
