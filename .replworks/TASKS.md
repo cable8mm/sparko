@@ -27,7 +27,7 @@
     - Invalid and ineligible plans cannot start a charge.
     - Unit tests pass.
 
-- [ ] T-004 Trial, billing-key enrollment, and subscription start
+- [x] T-004 Trial, billing-key enrollment, and subscription start
   - Satisfies: PRODUCT_SPEC.md Plans (FR-008, FR-010, FR-041, FR-042); Payment methods and subscriptions (FR-011, FR-014); Acceptance Criteria (AC-004, AC-005, AC-010, AC-017)
   - External boundary: yes
   - Acceptance criteria:
