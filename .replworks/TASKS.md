@@ -90,7 +90,7 @@
     - A live E2E test exercises the webhook boundary and passes.
     - Unit tests pass.
 
-- [ ] T-010 Payment history, invoices, receipts, and email
+- [x] T-010 Payment history, invoices, receipts, and email
   - Satisfies: PRODUCT_SPEC.md Billing and documents (FR-020, FR-021, FR-022, FR-039, FR-040); Acceptance Criteria (AC-014, AC-015)
   - External boundary: yes
   - Acceptance criteria:

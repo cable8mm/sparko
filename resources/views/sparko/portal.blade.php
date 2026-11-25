@@ -8,6 +8,22 @@
             <span data-renewal-amount>{{ $subscription->renewal_amount }}</span>
         </section>
     @endif
+    @if ($subscription !== null)
+        <section data-sparko-history-plan data-plan-id="{{ $subscription->plan_id }}" data-seat-quantity="{{ $subscription->seat_quantity }}"></section>
+    @endif
+    <section data-sparko-payments>
+        @foreach ($payments as $payment)
+            <article data-payment-id="{{ $payment->payment_id }}" data-status="{{ $payment->status }}">
+                <time>{{ $payment->paid_at?->toIso8601String() ?? '' }}</time>
+                <span data-amount>{{ $payment->amount }}</span>
+                <span data-order-name>{{ $payment->order_name }}</span>
+                @if ($payment->receipt_url)
+                    <a href="{{ $payment->receipt_url }}" data-receipt>receipt</a>
+                @endif
+                <a href="{{ route('sparko.invoice.download', [$billable, $payment]) }}" data-invoice>invoice</a>
+            </article>
+        @endforeach
+    </section>
     <section data-sparko-plans>
         @foreach ($plans as $plan)
             <article data-plan-id="{{ $plan['id'] }}" @class(['archived' => $plan['archived'], 'current' => $plan['is_current']])>

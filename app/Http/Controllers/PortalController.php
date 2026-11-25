@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SparkoSubscription;
 use App\Sparko\Contracts\BillableEntity;
+use App\Sparko\Documents\InvoiceGenerator;
 use App\Sparko\PaymentMethods\BillingKeyInUse;
 use App\Sparko\PaymentMethods\PaymentMethodManager;
 use App\Sparko\Plans\PlanCatalog;
@@ -13,6 +14,7 @@ use App\Sparko\Subscriptions\PlanSwitchService;
 use App\Sparko\Subscriptions\SubscriptionStarter;
 use Cable8mm\LaravelPortone\BillingKeyGateway;
 use Cable8mm\LaravelPortone\BillingKeyRegistry;
+use Cable8mm\LaravelPortone\Models\Payment;
 use Carbon\CarbonImmutable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
@@ -20,6 +22,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use InvalidArgumentException;
+use Symfony\Component\HttpFoundation\Response;
 
 class PortalController extends Controller
 {
@@ -40,7 +43,24 @@ class PortalController extends Controller
             'plans' => $catalog->forPortal($billable, $currentPlanId),
             'currentPlanId' => $currentPlanId,
             'subscription' => $subscription,
+            'payments' => Payment::query()
+                ->where('billable_type', $billable->getMorphClass())
+                ->where('billable_id', (string) $billable->getKey())
+                ->latest()
+                ->get(),
         ]);
+    }
+
+    public function downloadInvoice(mixed $billable, Payment $payment, InvoiceGenerator $invoices): Response
+    {
+        $billable = $this->billable($billable);
+
+        if ($payment->billable_type !== $billable->getMorphClass()
+            || (string) $payment->billable_id !== (string) $billable->getKey()) {
+            abort(404);
+        }
+
+        return response($invoices->pdf($payment), 200, ['Content-Type' => 'application/pdf']);
     }
 
     public function enrollPaymentMethod(
