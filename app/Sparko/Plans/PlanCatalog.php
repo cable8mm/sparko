@@ -53,6 +53,11 @@ class PlanCatalog
 
         $this->validatePrices($plan['prices']);
         $this->validateTrialDays($plan['trial_days']);
+
+        if (array_key_exists('trial_requires_payment_method', $plan) && ! is_bool($plan['trial_requires_payment_method'])) {
+            throw new InvalidPlanConfiguration('A plan trial_requires_payment_method must be a boolean.');
+        }
+
         $this->validateFeatures($plan['features']);
 
         if (! is_array($plan['options']) || ! is_array($plan['eligibility'])) {

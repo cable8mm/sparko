@@ -11,6 +11,7 @@ declare(strict_types=1);
 |   description           string  display description
 |   prices                array   "monthly" and/or "yearly" KRW amounts
 |   trial_days            ?int    override of default_trial_days
+|   trial_requires_payment_method ?bool override of the global up-front key requirement
 |   features              array   "included" and "unavailable" display lists
 |   options               array   machine-readable entitlement keys and values
 |   eligibility           array   constraints on who may select the plan

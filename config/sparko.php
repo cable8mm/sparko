@@ -12,4 +12,7 @@ use App\Models\User;
 
 return [
     'billable_model' => env('SPARKO_BILLABLE_MODEL', User::class),
+    'require_terms' => env('SPARKO_REQUIRE_TERMS', false),
+    'live_billing_key_e2e' => env('SPARKO_LIVE_BILLING_KEY_E2E', false),
+    'e2e_channel_key' => env('PORTONE_E2E_CHANNEL_KEY'),
 ];
