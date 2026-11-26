@@ -18,6 +18,7 @@ Route::middleware(['auth', EnsureBillableAccess::class])
     ->group(function (): void {
         Route::get('/{billable}', [PortalController::class, 'show'])->name('sparko.portal');
         Route::get('/{billable}/entitlements', [PortalController::class, 'entitlements'])->name('sparko.entitlements');
+        Route::post('/{billable}/discount', [PortalController::class, 'applyDiscount'])->name('sparko.discount.store');
         Route::post('/{billable}/payment-method', [PortalController::class, 'enrollPaymentMethod'])->name('sparko.payment-method.store');
         Route::post('/{billable}/payment-method/replace', [PortalController::class, 'replacePaymentMethod'])->name('sparko.payment-method.replace');
         Route::delete('/{billable}/payment-method', [PortalController::class, 'removePaymentMethod'])->name('sparko.payment-method.destroy');

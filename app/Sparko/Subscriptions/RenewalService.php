@@ -6,6 +6,7 @@ namespace App\Sparko\Subscriptions;
 
 use App\Mail\FailedRenewalNotice;
 use App\Models\SparkoSubscription;
+use App\Sparko\Discounts\DiscountService;
 use App\Sparko\Plans\PlanPricing;
 use Cable8mm\LaravelPortone\PaymentOperations;
 use Carbon\CarbonImmutable;
@@ -20,6 +21,7 @@ class RenewalService
     public function __construct(
         private readonly PlanPricing $pricing,
         private readonly PaymentOperations $payments,
+        private readonly DiscountService $discounts,
     ) {}
 
     public function chargeDue(CarbonImmutable $now): int
@@ -62,7 +64,10 @@ class RenewalService
                 continue;
             }
 
-            $amount = (int) $subscription->renewal_amount - (int) $subscription->credit_balance;
+            $amount = $this->discounts->resolve(
+                (int) $subscription->renewal_amount - (int) $subscription->credit_balance,
+                $subscription,
+            );
             $credit = 0;
 
             if ($amount <= 0) {
@@ -86,6 +91,8 @@ class RenewalService
                     continue;
                 }
             }
+
+            $this->discounts->consume($subscription);
 
             $next = CarbonImmutable::parse($period)
                 ->addDays($this->pricing->periodDays((string) $subscription->billing_interval));
