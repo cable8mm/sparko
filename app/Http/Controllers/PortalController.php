@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Models\SparkoSubscription;
 use App\Sparko\Contracts\BillableEntity;
+use App\Sparko\Discounts\DiscountService;
+use App\Sparko\Discounts\InvalidDiscount;
 use App\Sparko\Documents\InvoiceGenerator;
 use App\Sparko\PaymentMethods\BillingKeyInUse;
 use App\Sparko\PaymentMethods\PaymentMethodManager;
@@ -150,6 +152,28 @@ class PortalController extends Controller
         return response()->json(['options' => $service->optionsFor($billable)]);
     }
 
+    public function applyDiscount(Request $request, mixed $billable, DiscountService $discounts): JsonResponse
+    {
+        $billable = $this->billable($billable);
+
+        $data = $request->validate([
+            'code' => ['required', 'string'],
+        ]);
+
+        try {
+            $subscription = $discounts->apply($billable, $data['code']);
+        } catch (InvalidDiscount $exception) {
+            throw ValidationException::withMessages(['code' => $exception->getMessage()]);
+        }
+
+        return response()->json([
+            'code' => $subscription->discount_code,
+            'type' => $subscription->discount_type,
+            'value' => $subscription->discount_value,
+            'duration' => $subscription->discount_duration,
+        ]);
+    }
+
     public function cancelSubscription(mixed $billable, SubscriptionCancellation $cancellation): JsonResponse
     {
         $billable = $this->billable($billable);
@@ -219,6 +243,7 @@ class PortalController extends Controller
             'plan_id' => ['required', 'string'],
             'terms_accepted' => ['sometimes', 'boolean'],
             'billing_key_issue_id' => ['nullable', 'string'],
+            'promotion_code' => ['nullable', 'string'],
         ]);
 
         $subscription = $starter->start(
@@ -227,6 +252,7 @@ class PortalController extends Controller
             $data['plan_id'],
             (bool) ($data['terms_accepted'] ?? false),
             $data['billing_key_issue_id'] ?? null,
+            $data['promotion_code'] ?? null,
         );
 
         $trialEndsAt = $subscription->getRawOriginal('trial_ends_at');

@@ -6,6 +6,7 @@ namespace App\Sparko\Subscriptions;
 
 use App\Models\SparkoSubscription;
 use App\Sparko\Contracts\BillableEntity;
+use App\Sparko\Discounts\DiscountService;
 use App\Sparko\Plans\PlanCatalog;
 use App\Sparko\Plans\PlanPricing;
 use Cable8mm\LaravelPortone\Models\BillingKey;
@@ -18,6 +19,7 @@ class SubscriptionStarter
     public function __construct(
         private readonly TrialManager $trials,
         private readonly PlanPricing $pricing,
+        private readonly DiscountService $discounts,
     ) {}
 
     public function start(
@@ -26,6 +28,7 @@ class SubscriptionStarter
         string $planId,
         bool $termsAccepted,
         ?string $billingKeyIssueId,
+        ?string $promotionCode = null,
     ): SparkoSubscription {
         if (! $billable instanceof Model) {
             throw new InvalidArgumentException('A billable entity must be an Eloquent model.');
@@ -57,7 +60,7 @@ class SubscriptionStarter
             }
         }
 
-        return SparkoSubscription::query()->create([
+        $subscription = SparkoSubscription::query()->create([
             'billable_type' => $billable->getMorphClass(),
             'billable_id' => (string) $billable->getKey(),
             'plan_id' => $planId,
@@ -71,5 +74,11 @@ class SubscriptionStarter
             'terms_accepted_at' => $termsAccepted ? CarbonImmutable::now() : null,
             'status' => $trialEndsAt === null ? 'ACTIVE' : 'TRIAL',
         ]);
+
+        if ($promotionCode !== null && $promotionCode !== '') {
+            $this->discounts->apply($billable, $promotionCode);
+        }
+
+        return $subscription->fresh();
     }
 }

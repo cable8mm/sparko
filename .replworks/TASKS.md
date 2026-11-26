@@ -127,7 +127,7 @@
     - The portal displays both kinds of feature distinctly.
     - Unit tests pass.
 
-- [ ] T-014 Promotion codes and subscription discounts
+- [x] T-014 Promotion codes and subscription discounts
   - Satisfies: PRODUCT_SPEC.md Portal integration and discounts (FR-031, FR-036, FR-037, FR-038); Acceptance Criteria (AC-020)
   - External boundary: yes
   - Acceptance criteria:

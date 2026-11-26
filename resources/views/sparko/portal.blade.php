@@ -22,6 +22,15 @@
     @if ($subscription !== null)
         <section data-sparko-history-plan data-plan-id="{{ $subscription->plan_id }}" data-seat-quantity="{{ $subscription->seat_quantity }}"></section>
     @endif
+    @if (config('discounts.enabled'))
+        <section data-sparko-promotion>
+            <form method="POST" action="{{ route('sparko.discount.store', $billable) }}">
+                @csrf
+                <input type="text" name="code" data-promotion-code>
+                <button type="submit" data-apply-promotion>Apply</button>
+            </form>
+        </section>
+    @endif
     <section data-sparko-payments>
         @foreach ($payments as $payment)
             <article data-payment-id="{{ $payment->payment_id }}" data-status="{{ $payment->status }}">
