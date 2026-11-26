@@ -98,6 +98,27 @@ class PlanCatalogTest extends TestCase
         app(PlanCatalog::class)->assertSelectable('pro', User::factory()->make());
     }
 
+    public function test_rejects_features_without_both_groups(): void
+    {
+        config()->set('plans.plans', [$this->plan(['features' => ['included' => ['reports']]])]);
+
+        $this->expectException(InvalidPlanConfiguration::class);
+
+        app(PlanCatalog::class)->all();
+    }
+
+    public function test_portal_entries_preserve_both_feature_groups(): void
+    {
+        config()->set('plans.plans', [$this->plan([
+            'features' => ['included' => ['reports'], 'unavailable' => ['seats']],
+        ])]);
+
+        $entries = app(PlanCatalog::class)->forPortal(User::factory()->make(), null);
+
+        $this->assertSame(['reports'], $entries[0]['features']['included']);
+        $this->assertSame(['seats'], $entries[0]['features']['unavailable']);
+    }
+
     public function test_assert_selectable_returns_the_plan_when_eligible(): void
     {
         config()->set('plans.plans', [$this->plan()]);
