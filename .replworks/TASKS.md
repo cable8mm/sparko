@@ -102,7 +102,7 @@
     - A live E2E test covers PortOne document retrieval; email delivery is verified against the selected mail boundary.
     - Unit tests pass.
 
-- [ ] T-011 Cancellation and resume
+- [x] T-011 Cancellation and resume
   - Satisfies: PRODUCT_SPEC.md Cancellation and renewal (FR-024, FR-025, FR-026); Acceptance Criteria (AC-016)
   - External boundary: no
   - Acceptance criteria:

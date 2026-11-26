@@ -6,6 +6,17 @@
                  data-seat-quantity="{{ $subscription->seat_quantity }}"
                  data-next-payment="{{ $subscription->next_charge_at?->toIso8601String() ?? '' }}">
             <span data-renewal-amount>{{ $subscription->renewal_amount }}</span>
+            @if ($subscription->status === 'CANCELLED')
+                <form method="POST" action="{{ route('sparko.subscription.resume', $billable) }}">
+                    @csrf
+                    <button type="submit" data-resume>Resume</button>
+                </form>
+            @else
+                <form method="POST" action="{{ route('sparko.subscription.cancel', $billable) }}">
+                    @csrf
+                    <button type="submit" data-cancel>Cancel</button>
+                </form>
+            @endif
         </section>
     @endif
     @if ($subscription !== null)

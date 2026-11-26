@@ -33,6 +33,17 @@ class RenewalService
             ->get();
 
         foreach ($due as $subscription) {
+            if ($subscription->status === 'CANCELLED') {
+                $subscription->update([
+                    'status' => 'ENDED',
+                    'next_charge_at' => null,
+                ]);
+
+                $count++;
+
+                continue;
+            }
+
             $period = (string) $subscription->getRawOriginal('next_charge_at');
 
             if ($subscription->last_charged_period === $period) {
