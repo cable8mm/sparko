@@ -119,7 +119,7 @@
     - Cross-entity entitlement checks cannot read another billable entity's subscription.
     - Unit tests pass.
 
-- [ ] T-013 Included and unavailable plan features
+- [x] T-013 Included and unavailable plan features
   - Satisfies: PRODUCT_SPEC.md Plans (FR-030); Acceptance Criteria (AC-019)
   - External boundary: no
   - Acceptance criteria:
