@@ -146,7 +146,7 @@
     - Korean-language labels, KRW formatting, and Korean date formatting are present.
     - Unit tests pass.
 
-- [ ] T-016 End subscription before billable-entity deletion
+- [x] T-016 End subscription before billable-entity deletion
   - Satisfies: PRODUCT_SPEC.md PortOne adaptation policies (FR-043); Portal integration and discounts (FR-032); Acceptance Criteria (AC-022)
   - External boundary: yes
   - Acceptance criteria:

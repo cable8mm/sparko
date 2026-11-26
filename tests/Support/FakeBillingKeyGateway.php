@@ -12,6 +12,8 @@ class FakeBillingKeyGateway implements BillingKeyGateway
     /** @var list<string> */
     public array $deleted = [];
 
+    public bool $failDeletes = false;
+
     public function assertConfigured(): void {}
 
     public function billingKeyInfo(#[\SensitiveParameter] string $billingKey): GatewayBillingKey
@@ -21,6 +23,10 @@ class FakeBillingKeyGateway implements BillingKeyGateway
 
     public function deleteBillingKey(#[\SensitiveParameter] string $billingKey, string $reason): void
     {
+        if ($this->failDeletes) {
+            throw new \RuntimeException('provider unavailable');
+        }
+
         $this->deleted[] = $billingKey;
     }
 
