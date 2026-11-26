@@ -9,6 +9,7 @@ use App\Sparko\Contracts\BillableEntity;
 use App\Sparko\Documents\InvoiceGenerator;
 use App\Sparko\PaymentMethods\BillingKeyInUse;
 use App\Sparko\PaymentMethods\PaymentMethodManager;
+use App\Sparko\Plans\EntitlementService;
 use App\Sparko\Plans\PlanCatalog;
 use App\Sparko\Subscriptions\PlanSwitchService;
 use App\Sparko\Subscriptions\SubscriptionCancellation;
@@ -140,6 +141,13 @@ class PortalController extends Controller
         }
 
         return response()->json(['status' => 'DELETED']);
+    }
+
+    public function entitlements(mixed $billable, EntitlementService $service): JsonResponse
+    {
+        $billable = $this->billable($billable);
+
+        return response()->json(['options' => $service->optionsFor($billable)]);
     }
 
     public function cancelSubscription(mixed $billable, SubscriptionCancellation $cancellation): JsonResponse
