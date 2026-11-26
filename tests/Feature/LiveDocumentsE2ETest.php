@@ -115,7 +115,7 @@ class LiveDocumentsE2ETest extends TestCase
 
             $this->actingAs($user)->get(route('sparko.portal', $user))
                 ->assertOk()
-                ->assertSee('1000')
+                ->assertSee('₩1,000')
                 ->assertSee('data-receipt', false)
                 ->assertSee(route('sparko.invoice.download', [$user, $payment]));
 

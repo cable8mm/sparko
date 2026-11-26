@@ -137,7 +137,7 @@
     - Discounted charge amounts are verified with a live PortOne E2E test.
     - Unit tests pass.
 
-- [ ] T-015 Isolated portal UI and Korean presentation
+- [x] T-015 Isolated portal UI and Korean presentation
   - Satisfies: PRODUCT_SPEC.md Portal integration and discounts (FR-027, FR-033); Acceptance Criteria (AC-021)
   - External boundary: no
   - Acceptance criteria:
