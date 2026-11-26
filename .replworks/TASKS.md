@@ -110,7 +110,7 @@
     - A scheduled cancellation can be resumed before period end.
     - Unit tests pass.
 
-- [ ] T-012 Plan entitlements and subscription access gate
+- [x] T-012 Plan entitlements and subscription access gate
   - Satisfies: PRODUCT_SPEC.md Plans (FR-028); Access and billable entity (FR-029); Acceptance Criteria (AC-018)
   - External boundary: no
   - Acceptance criteria:
