@@ -13,6 +13,7 @@ use App\Sparko\PaymentMethods\BillingKeyInUse;
 use App\Sparko\PaymentMethods\PaymentMethodManager;
 use App\Sparko\Plans\EntitlementService;
 use App\Sparko\Plans\PlanCatalog;
+use App\Sparko\Presentation\KoreanFormatter;
 use App\Sparko\Subscriptions\PlanSwitchService;
 use App\Sparko\Subscriptions\SubscriptionCancellation;
 use App\Sparko\Subscriptions\SubscriptionStarter;
@@ -31,7 +32,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class PortalController extends Controller
 {
-    public function show(mixed $billable, PlanCatalog $catalog): View
+    public function show(mixed $billable, PlanCatalog $catalog, KoreanFormatter $formatter): View
     {
         $billable = $this->billable($billable);
 
@@ -48,6 +49,8 @@ class PortalController extends Controller
             'plans' => $catalog->forPortal($billable, $currentPlanId),
             'currentPlanId' => $currentPlanId,
             'subscription' => $subscription,
+            'formatter' => $formatter,
+            'returnUrl' => (string) config('sparko.return_url'),
             'payments' => Payment::query()
                 ->where('billable_type', $billable->getMorphClass())
                 ->where('billable_id', (string) $billable->getKey())
